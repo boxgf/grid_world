@@ -64,7 +64,7 @@ class State:
 			agent_char = 'h'
 		for i in [-1,0,1]:
 			for j in [-1,0,1]:
-				if i == j == 0: continue
+				#if i == j == 0: continue
 				if self.isValidPose((agent_pose[0]+i,agent_pose[1]+j)):
 					new_state = self.copy()
 					if agent_char == 'h' and new_state.env.grid[agent_pose[0]][agent_pose[1]] == 'f':
