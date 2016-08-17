@@ -1,59 +1,57 @@
-class AlphaBetaAgent(MultiAgentSearchAgent):
+class AlphaBetaAgent():
 
-
+    totalNoMoves = None
+    max_depth = None
+    def __init__(self,depth):
+		self.max_depth = depth
+		
+		
     def getAction(self, state):
         """
           Returns the minimax action using self.depth and self.evaluationFunction
         """
         
-        self.totalNoMoves=float(gameState.getNumAgents())
-        returning=self.Value(gameState,-float("infinity"),+float("infinity"),-1,self.totalNoMoves-1,1)
+        self.totalNoMoves=float(state.getNumAgents())
+        returning=self.Value(state,-float("infinity"),+float("infinity"), self.totalNoMoves - 1,0)
         return random.choice(returning)
         util.raiseNotDefined()
 
       
-    def Value(self,State,alpha,beta, depthExpanded, Agentnumber ,flag=0):
-        depthExpanded+=1
-        
-        if State.isLose() or State.isWin() or (Agentnumber+1==self.totalNoMoves and (self.depth == float(depthExpanded)/self.totalNoMoves)):
-            return self.evaluationFunction(State)
+    def Value(self,state,alpha,beta, depthExpanded, Agentnumber):
+        print self.max_depth, float(depthExpanded)/self.totalNoMoves, self.max_depth == float(depthExpanded)/self.totalNoMoves, Agentnumber+1 
+        if  (Agentnumber+1 == self.totalNoMoves and (self.max_depth == float(depthExpanded)/self.totalNoMoves)):
+            return self.evaluationFunction(state)
         if Agentnumber+1==self.totalNoMoves:
-            return self.Maxvalue(State,alpha,beta,depthExpanded,flag)
+            return self.Maxvalue(state,alpha,beta,depthExpanded + 1)
         if Agentnumber+1 < self.totalNoMoves:
-            return self.Minvalue(State,alpha,beta,depthExpanded,Agentnumber+1)
-        util.raiseNotDefined()
-    def Maxvalue(self,State,alpha,beta,depthExpanded,flag=0):
+            return self.Minvalue(state,alpha,beta,depthExpanded + 1,Agentnumber + 1)
         
-        v=-float("infinity")
-        LegalActions=State.getLegalActions(0)
-        if flag ==1:
-            Scoredic={}
+    def Maxvalue(self,state,alpha,beta,depthExpanded):
+        
+        v = -float("infinity")
+        LegalActions=state.getLegalActions(0)
+        
         for action in LegalActions:
-            Successor=State.generateSuccessor(0,action)
+            Successor=state.getActionSuccessor(0,action)
             score = self.Value(Successor,alpha,beta,depthExpanded,0)
             v=max(v,score)
-            if flag ==1:
-                if score not in Scoredic:
-                    Scoredic[score]=[]
-                Scoredic[score]+=[action]
             if v>beta:
                 if flag==0:
                     return v
                 else:
                     return Scoredic[max(Scoredic)]
             alpha=max(alpha,v)
-        if flag ==1:
-            return Scoredic[max(Scoredic)]
+       
         else:
             return v
         
-            util.raiseNotDefined()
-    def Minvalue(self,State,alpha,beta,depthExpanded,Agentnumber):
             
-            v=float("infinity")
-            LegalActions=State.getLegalActions(Agentnumber)
+    def Minvalue(self,state,alpha,beta,depthExpanded,Agentnumber):
+            
+            v = float("infinity")
+            LegalActions=state.getLegalActions(Agentnumber)
             for action in LegalActions:
-                Successor=State.generateSuccessor(Agentnumber,action)
+                Successor=state.getActionSuccessor(Agentnumber,action)
                 v=min(v,self.Value(Successor,alpha,beta,depthExpanded,Agentnumber))
                 if v < alpha:
                     return v
