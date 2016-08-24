@@ -11,6 +11,6 @@ if __name__ == '__main__':
 	state.setState(robots,humans,obstacles,pellets)
 	state.display()
 	
-	agent = AlphaBetaAgent(3)
+	agent = AlphaBetaAgent(1)
 	agent.getAction(state)
 	

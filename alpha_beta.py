@@ -1,24 +1,36 @@
+import util
 class AlphaBetaAgent():
 
     totalNoMoves = None
     max_depth = None
     def __init__(self,depth):
 		self.max_depth = depth
-		
-		
+    def evaluationFunction(self, state):
+		min_human_dist = min_pellet_dist = min_obstacle_dist = float('inf')
+		for bot in state.bots:
+			for human in state.humans:
+				if min_human_dist > util.squaredEucledian(state.humans[human],state.bots[bot]):
+					min_human_dist = util.squaredEucledian(state.humans[human],state.bots[bot])
+			for pellet in state.pellets:
+				if min_pellet_dist > util.squaredEucledian(pellet,state.bots[bot]):
+					min_pellet_dist = util.squaredEucledian(pellet,state.bots[bot])
+			for obstacle in state.obstacles:
+				if min_obstacle_dist > util.squaredEucledian(obstacle,state.bots[bot]):
+					min_obstacle_dist = util.squaredEucledian(obstacle,state.bots[bot])
+		return 1.0/min_human_dist + min_pellet_dist + 1.0/min_obstacle_dist		
+    
     def getAction(self, state):
         """
           Returns the minimax action using self.depth and self.evaluationFunction
         """
         
         self.totalNoMoves=float(state.getNumAgents())
-        returning=self.Value(state,-float("infinity"),+float("infinity"), self.totalNoMoves - 1,0)
+        returning=self.Value(state,-float("infinity"),+float("infinity"),0, self.totalNoMoves - 1)
         return random.choice(returning)
-        util.raiseNotDefined()
 
       
     def Value(self,state,alpha,beta, depthExpanded, Agentnumber):
-        print self.max_depth, float(depthExpanded)/self.totalNoMoves, self.max_depth == float(depthExpanded)/self.totalNoMoves, Agentnumber+1 
+        print 'max_depth =',self.max_depth,'depth_expanded =',depthExpanded,'depth/totalmoves =', float(depthExpanded)/self.totalNoMoves,'max_depth == prev frac', self.max_depth == float(depthExpanded)/self.totalNoMoves, Agentnumber+1 
         if  (Agentnumber+1 == self.totalNoMoves and (self.max_depth == float(depthExpanded)/self.totalNoMoves)):
             return self.evaluationFunction(state)
         if Agentnumber+1==self.totalNoMoves:
@@ -36,14 +48,9 @@ class AlphaBetaAgent():
             score = self.Value(Successor,alpha,beta,depthExpanded,0)
             v=max(v,score)
             if v>beta:
-                if flag==0:
-                    return v
-                else:
-                    return Scoredic[max(Scoredic)]
+                return v
             alpha=max(alpha,v)
-       
-        else:
-            return v
+        return v
         
             
     def Minvalue(self,state,alpha,beta,depthExpanded,Agentnumber):
