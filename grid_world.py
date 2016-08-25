@@ -12,6 +12,7 @@ class GridWorld:
 
 class State:
 	env = None
+	pellets_eaten = 0
 	bots = {}
 	humans = {}
 	pellets = []
@@ -22,25 +23,30 @@ class State:
 	def getNumAgents(self):
 		return len(self.bots) + len(self.humans)
 	def setState(self,robots,humans,obstacles,pellets):
+
+		for i in pellets:
+			self.env.grid[i[0]][i[1]] = 'p'
+			
+		for i in xrange(len(humans)):
+			self.humans['human' + str(i)] = humans[i]
+			if self.env.grid[humans[i][0]][humans[i][1]] == 'p':
+				self.env.grid[humans[i][0]][humans[i][1]] = 'f'
+			else:
+				self.env.grid[humans[i][0]][humans[i][1]] = 'h'
+		self.obstacles	= obstacles	
 		for i in xrange(len(robots)):
 			self.bots['robot' + str(i)] = robots[i]
 			
 			self.env.grid[robots[i][0]][robots[i][1]] = 'b'
-		for i in xrange(len(humans)):
-			self.humans['human' + str(i)] = humans[i]
-			self.env.grid[humans[i][0]][humans[i][1]] = 'h'
-		self.obstacles	= obstacles	
-		
 		for i in obstacles:
 			self.env.grid[i[0]][i[1]] = 'o'
 		
 		self.pellets = pellets
 		
-		for i in pellets:
-			self.env.grid[i[0]][i[1]] = 'p'
+
 		
 	def isValidPose(self, pose):
-		return (pose[0] < self.env.length and pose[0] > 0 and pose[1] < self.env.breadth and pose[1] > 0) and (self.env.grid[pose[0]][pose[1]] == '.' or self.env.grid[pose[0]][pose[1]] == 'p') 
+		return (pose[0] <= self.env.length and pose[0] >= 0 and pose[1] <= self.env.breadth and pose[1] >= 0) and (self.env.grid[pose[0]][pose[1]] == '.' or self.env.grid[pose[0]][pose[1]] == 'p') 
 
 	def copy(self):
 		copy_state = copy.deepcopy(self)
@@ -60,6 +66,7 @@ class State:
 			agent_char = 'h'
 		for i in [-1,0,1]:
 			for j in [-1,0,1]:
+				if i==j==0: continue
 				if i==j==0 or self.isValidPose((agent_pose[0]+i,agent_pose[1]+j)):
 					legal_actions.append((i,j),)
 		return legal_actions
@@ -76,7 +83,8 @@ class State:
 		if action == (0,0) or self.isValidPose((agent_pose[0]+action[0],agent_pose[1]+action[1])):
 			new_state = self.copy()
 			if action != (0,0):
-				
+				if agent_char == 'b' and new_state.env.grid[agent_pose[0]+action[0]][agent_pose[1]+action[1]] == 'p':
+					new_state.pellets_eaten += 1
 				if agent_char == 'h' and new_state.env.grid[agent_pose[0]][agent_pose[1]] == 'f':
 					new_state.env.grid[agent_pose[0]][agent_pose[1]] = 'p'
 				else:
@@ -91,6 +99,7 @@ class State:
 					new_state.humans['human' + str(agent_index - len(self.bots))] = (agent_pose[0]+action[0],agent_pose[1]+action[1])
 				else:
 					new_state.bots['robot'+str(agent_index)] = (agent_pose[0]+action[0],agent_pose[1]+action[1])
+					
 
 
 			return new_state
@@ -111,7 +120,8 @@ class State:
 		if action == (0,0) or self.isValidPose((agent_pose[0]+action[0],agent_pose[1]+action[1])):
 			
 			if action != (0,0):
-				
+				if agent_char == 'b' and self.env.grid[agent_pose[0]+action[0]][agent_pose[1]+action[1]] == 'p':
+					self.pellets_eaten += 1
 				if agent_char == 'h' and new_state.env.grid[agent_pose[0]][agent_pose[1]] == 'f':
 					self.env.grid[agent_pose[0]][agent_pose[1]] = 'p'
 				else:
