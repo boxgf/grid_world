@@ -18,7 +18,10 @@ class AlphaBetaAgent():
 			for obstacle in state.obstacles:
 				if min_obstacle_dist > util.squaredEucledian(obstacle,state.bots[bot]):
 					min_obstacle_dist = util.squaredEucledian(obstacle,state.bots[bot])
-		return .1 * min_human_dist - .3 * min_pellet_dist + 0.05 * min_obstacle_dist	 + 100 * state.pellets_eaten;	
+		if min_human_dist == float('inf') : min_human_dist = 0
+		if min_pellet_dist == float('inf'): min_pellet_dist = 0
+		if min_obstacle_dist == float('inf'): min_obstacle_dist = 0 
+		return .1 * min_human_dist - .3 * min_pellet_dist + 0.05 * min_obstacle_dist	 + 100 * state.pellets_eaten + 500 * state.win_status - 5000 * state.lose_status;	
     
     def getAction(self, state):
         """
@@ -45,7 +48,8 @@ class AlphaBetaAgent():
         
         for action in LegalActions:
             Successor=state.getActionSuccessor(0,action)
-
+            #Successor.display()
+            #self.evaluationFunction(Successor)
             score = self.Value(Successor,alpha,beta,depthExpanded,0)
             if(depthExpanded == 1 ):
 				if score not in best_action : best_action[score] = []
@@ -55,7 +59,13 @@ class AlphaBetaAgent():
                 return v
             alpha=max(alpha,v)
         if(depthExpanded == 1):
-			return random.choice(best_action[max(best_action)])
+			depth_0_best_action = {}
+			for action in best_action[max(best_action)]:
+				Successor=state.getActionSuccessor(0,action)
+				score = self.Value(Successor,alpha,beta,depthExpanded,0)
+				if score not in depth_0_best_action: depth_0_best_action[score] = []
+				depth_0_best_action[score].append(action)
+			return random.choice(depth_0_best_action[max(depth_0_best_action)])
         return v
         
             
